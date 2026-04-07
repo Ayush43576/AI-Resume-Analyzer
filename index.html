@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ResumeIQ — AI-Powered ATS Resume Intelligence</title>
+  <meta name="description" content="Score your resume like a real ATS. Get skill gap analysis, job matches, and AI-powered suggestions." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23e94560'/><text x='6' y='23' font-size='18' font-family='sans-serif' font-weight='700' fill='white'>R</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/style.css" />
+</head>
+<body>
+  <div class="app" id="app">
+    <!-- TOP NAV -->
+    <nav class="topbar">
+      <div class="logo">resume<span>IQ</span></div>
+      <div class="nav-tabs">
+        <button class="tab active" data-panel="upload">Upload</button>
+        <button class="tab" data-panel="analysis" id="tab-analysis" disabled>Analysis</button>
+        <button class="tab" data-panel="dashboard">Dashboard</button>
+        <button class="tab" data-panel="history">History</button>
+      </div>
+      <div class="nav-right">
+        <span class="beta-badge">BETA</span>
+      </div>
+    </nav>
+
+    <!-- UPLOAD PANEL -->
+    <div class="panel active" id="panel-upload">
+      <div class="upload-hero">
+        <div class="hero-eyebrow">AI-Powered Resume Scoring</div>
+        <h1>Your resume,<br><em>ATS-scored & optimized</em></h1>
+        <p>Upload your resume or pick a sample. Our AI analyzes skills, scores it like real ATS systems, detects skill gaps, and suggests targeted improvements.</p>
+      </div>
+
+      <div class="drop-zone" id="dropZone">
+        <div class="drop-inner">
+          <div class="drop-icon">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <rect width="40" height="40" rx="10" fill="rgba(233,69,96,0.1)"/>
+              <path d="M20 26V14M20 14L15 19M20 14L25 19" stroke="#e94560" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M13 30h14" stroke="#e94560" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <strong>Drop your resume here</strong>
+          <p>PDF, DOCX, or TXT — or <span class="link-text" onclick="triggerUpload()">browse files</span></p>
+          <input type="file" id="fileInput" accept=".pdf,.txt,.docx" />
+        </div>
+      </div>
+
+      <div class="section-label">Or try a sample resume</div>
+      <div class="sample-grid">
+        <div class="sample-card" onclick="loadSample('ds')">
+          <div class="sample-header">
+            <div class="sample-avatar" style="background:rgba(83,52,131,.15);color:#533483">DS</div>
+            <div>
+              <div class="sample-role">Data Scientist</div>
+              <div class="sample-level">Senior · 5 yrs exp</div>
+            </div>
+            <div class="sample-score">82</div>
+          </div>
+          <div class="sample-skills">
+            <span class="stag">Python</span><span class="stag">ML</span><span class="stag">SQL</span><span class="stag">TensorFlow</span>
+          </div>
+        </div>
+        <div class="sample-card" onclick="loadSample('fe')">
+          <div class="sample-header">
+            <div class="sample-avatar" style="background:rgba(15,52,96,.15);color:#0f3460">FE</div>
+            <div>
+              <div class="sample-role">Frontend Developer</div>
+              <div class="sample-level">Mid · 3 yrs exp</div>
+            </div>
+            <div class="sample-score">74</div>
+          </div>
+          <div class="sample-skills">
+            <span class="stag">React</span><span class="stag">TypeScript</span><span class="stag">CSS</span>
+          </div>
+        </div>
+        <div class="sample-card" onclick="loadSample('be')">
+          <div class="sample-header">
+            <div class="sample-avatar" style="background:rgba(233,69,96,.12);color:#e94560">BE</div>
+            <div>
+              <div class="sample-role">Backend Engineer</div>
+              <div class="sample-level">Junior · 1 yr exp</div>
+            </div>
+            <div class="sample-score">58</div>
+          </div>
+          <div class="sample-skills">
+            <span class="stag">Node.js</span><span class="stag">MongoDB</span><span class="stag">Express</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="how-it-works">
+        <div class="section-label">How it works</div>
+        <div class="steps-row">
+          <div class="step"><div class="step-num">01</div><div class="step-text">Upload resume PDF</div></div>
+          <div class="step-arrow">→</div>
+          <div class="step"><div class="step-num">02</div><div class="step-text">NLP extracts skills</div></div>
+          <div class="step-arrow">→</div>
+          <div class="step"><div class="step-num">03</div><div class="step-text">ATS score computed</div></div>
+          <div class="step-arrow">→</div>
+          <div class="step"><div class="step-num">04</div><div class="step-text">AI suggestions generated</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROCESSING PANEL -->
+    <div class="panel" id="panel-processing">
+      <div class="processing-wrap">
+        <div class="processing-card">
+          <div class="spinner"></div>
+          <h2>Analyzing your resume…</h2>
+          <p>Running NLP pipeline & ATS scoring engine</p>
+          <ul class="process-steps" id="stepList">
+            <li id="s1"><span class="step-icon">◌</span> Extracting text with PyPDF2</li>
+            <li id="s2"><span class="step-icon">◌</span> NLP tokenization via spaCy</li>
+            <li id="s3"><span class="step-icon">◌</span> Detecting skills & keywords</li>
+            <li id="s4"><span class="step-icon">◌</span> Computing ATS score</li>
+            <li id="s5"><span class="step-icon">◌</span> Matching job roles</li>
+            <li id="s6"><span class="step-icon">◌</span> Generating AI suggestions</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANALYSIS PANEL -->
+    <div class="panel" id="panel-analysis">
+      <div class="analysis-header">
+        <div class="score-ring-wrap">
+          <svg class="score-svg" viewBox="0 0 120 120">
+            <circle class="ring-bg" cx="60" cy="60" r="50"/>
+            <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="50" stroke-dasharray="0 314"/>
+          </svg>
+          <div class="score-center">
+            <span class="score-num" id="scoreNum">0</span>
+            <small>ATS Score</small>
+          </div>
+        </div>
+        <div class="score-details">
+          <h2 id="resumeTitle">Resume Analysis</h2>
+          <div class="verdict-badge" id="verdictBadge">Analyzing…</div>
+          <div class="weight-note">Scoring weights: Skills 40% · Experience 25% · Projects 20% · Education 15%</div>
+          <div class="section-bars" id="scoreBars"></div>
+        </div>
+      </div>
+
+      <div class="analysis-grid">
+        <div class="acard">
+          <div class="acard-title">Skills Detected</div>
+          <div class="skill-list" id="skillsFound"></div>
+        </div>
+        <div class="acard">
+          <div class="acard-title">Missing Skills</div>
+          <div class="skill-list" id="skillsMissing"></div>
+        </div>
+        <div class="acard acard-full">
+          <div class="acard-title">Job Match Results</div>
+          <div class="job-list" id="jobList"></div>
+        </div>
+        <div class="acard acard-full">
+          <div class="acard-title">AI Improvement Suggestions</div>
+          <ul class="sugg-list" id="suggList"></ul>
+        </div>
+      </div>
+
+      <div class="re-analyze-bar">
+        <button class="btn-primary" onclick="showPanel('upload')">← Analyze Another Resume</button>
+        <button class="btn-outline" onclick="showPanel('dashboard')">View Dashboard →</button>
+      </div>
+    </div>
+
+    <!-- DASHBOARD PANEL -->
+    <div class="panel" id="panel-dashboard">
+      <div class="dash-metrics">
+        <div class="metric-card">
+          <div class="metric-val" id="d-count">4</div>
+          <div class="metric-lbl">Resumes Analyzed</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val" id="d-avg">71</div>
+          <div class="metric-lbl">Average ATS Score</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val" id="d-best">87</div>
+          <div class="metric-lbl">Best Score Achieved</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val" id="d-improve">+29</div>
+          <div class="metric-lbl">Total Score Improvement</div>
+        </div>
+      </div>
+      <div class="dash-charts-grid">
+        <div class="acard">
+          <div class="acard-title">Score Trend Over Time</div>
+          <div class="chart-wrap" style="height:220px"><canvas id="trendChart" role="img" aria-label="Line chart showing ATS score trend: 58, 74, 82, 87">Scores: 58, 74, 82, 87.</canvas></div>
+        </div>
+        <div class="acard">
+          <div class="acard-title">Skills Category Breakdown</div>
+          <div class="chart-wrap" style="height:220px"><canvas id="pieChart" role="img" aria-label="Donut chart of skill categories">Python/JS 30%, SQL 20%, ML/AI 25%, Infra 15%, Other 10%.</canvas></div>
+        </div>
+        <div class="acard acard-full">
+          <div class="acard-title">Resume Score Comparison</div>
+          <div class="chart-wrap" style="height:200px"><canvas id="barChart" role="img" aria-label="Horizontal bar chart comparing resume scores">BE 58, FE 74, DS 82, DS v2 87.</canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORY PANEL -->
+    <div class="panel" id="panel-history">
+      <div class="section-label" style="margin-top:0.5rem">Past Analyses</div>
+      <div class="history-list" id="histList"></div>
+      <div class="history-empty" id="histEmpty" style="display:none">
+        <p>No analyses yet. Upload a resume to get started.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>
