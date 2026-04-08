@@ -35,6 +35,8 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
 .dropzone p{font-size:13px;color:#9090a8}
 .dropzone p span{color:#e94560;text-decoration:underline;cursor:pointer}
 #fileInput{display:none}
+/* Error banner */
+#error-banner{display:none;background:rgba(233,69,96,0.12);border:1px solid rgba(233,69,96,0.4);border-radius:10px;color:#f37a8f;padding:12px 18px;margin-bottom:16px;font-size:13px;align-items:center;gap:10px}
 /* Labels */
 .slabel{font-size:10px;font-weight:800;letter-spacing:2px;color:#505065;text-transform:uppercase;margin-bottom:12px;display:block}
 /* Sample cards */
@@ -120,7 +122,6 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
 .metric{background:#1a1a28;border-radius:10px;padding:16px;text-align:center;border:1px solid rgba(255,255,255,0.07)}
 .metric-val{font-size:30px;font-weight:800}
 .metric-lbl{font-size:11px;color:#9090a8;margin-top:4px}
-/* SVG Charts */
 .chart-svg{width:100%;display:block}
 /* History */
 .hist-list{display:flex;flex-direction:column;gap:10px}
@@ -133,7 +134,6 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
 .hdelta{font-size:13px;font-weight:800}
 .dup{color:#3dd68c}.ddn{color:#e94560}
 .hist-empty{text-align:center;padding:48px;color:#9090a8;font-size:14px}
-/* Responsive */
 @media(max-width:680px){
   .hero h1{font-size:28px}
   .sample-grid{grid-template-columns:1fr}
@@ -166,8 +166,10 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
     <div class="hero">
       <div class="eyebrow">AI-Powered Resume Scoring</div>
       <h1>Your resume,<br><em>ATS-scored &amp; optimized</em></h1>
-      <p>Upload your resume or pick a sample. Our AI analyzes skills, scores it like real ATS systems, detects skill gaps, and suggests targeted improvements.</p>
+      <p>Upload your resume and Claude AI analyzes your skills, scores it like real ATS systems, detects skill gaps, and gives targeted improvement advice.</p>
     </div>
+
+    <div id="error-banner"></div>
 
     <div class="dropzone" id="dropZone">
       <div class="drop-icon">
@@ -175,7 +177,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
       </div>
       <strong>Drop your resume here</strong>
       <p>PDF, DOCX, or TXT &mdash; or <span onclick="triggerUpload()">browse files</span></p>
-      <input type="file" id="fileInput" accept=".pdf,.txt,.docx"/>
+      <input type="file" id="fileInput" accept=".pdf,.txt,.docx,.doc"/>
     </div>
 
     <span class="slabel">Or try a sample resume</span>
@@ -210,7 +212,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
     <div class="how-row">
       <div class="how-step"><div class="how-num">01</div><div class="how-txt">Upload resume PDF</div></div>
       <div class="how-arr">&#8594;</div>
-      <div class="how-step"><div class="how-num">02</div><div class="how-txt">NLP extracts skills</div></div>
+      <div class="how-step"><div class="how-num">02</div><div class="how-txt">Claude reads & parses</div></div>
       <div class="how-arr">&#8594;</div>
       <div class="how-step"><div class="how-num">03</div><div class="how-txt">ATS score computed</div></div>
       <div class="how-arr">&#8594;</div>
@@ -224,10 +226,10 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
       <div class="proc-card">
         <div class="spinner"></div>
         <h2>Analyzing your resume&hellip;</h2>
-        <p>Running NLP pipeline &amp; ATS scoring engine</p>
+        <p>Claude AI is reading and scoring your resume</p>
         <ul class="proc-steps" id="stepList">
-          <li id="s1"><span class="si">o</span>Extracting text with PyPDF2</li>
-          <li id="s2"><span class="si">o</span>NLP tokenization via spaCy</li>
+          <li id="s1"><span class="si">o</span>Reading resume file</li>
+          <li id="s2"><span class="si">o</span>Extracting text content</li>
           <li id="s3"><span class="si">o</span>Detecting skills &amp; keywords</li>
           <li id="s4"><span class="si">o</span>Computing ATS score</li>
           <li id="s5"><span class="si">o</span>Matching job roles</li>
@@ -274,10 +276,10 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
   <!-- DASHBOARD -->
   <div class="panel" id="panel-dashboard">
     <div class="dash-metrics">
-      <div class="metric"><div class="metric-val" id="d-count">4</div><div class="metric-lbl">Resumes Analyzed</div></div>
-      <div class="metric"><div class="metric-val" id="d-avg">71</div><div class="metric-lbl">Avg ATS Score</div></div>
-      <div class="metric"><div class="metric-val" id="d-best">87</div><div class="metric-lbl">Best Score</div></div>
-      <div class="metric"><div class="metric-val" id="d-improve">+29</div><div class="metric-lbl">Total Improvement</div></div>
+      <div class="metric"><div class="metric-val" id="d-count">0</div><div class="metric-lbl">Resumes Analyzed</div></div>
+      <div class="metric"><div class="metric-val" id="d-avg">0</div><div class="metric-lbl">Avg ATS Score</div></div>
+      <div class="metric"><div class="metric-val" id="d-best">0</div><div class="metric-lbl">Best Score</div></div>
+      <div class="metric"><div class="metric-val" id="d-improve">—</div><div class="metric-lbl">Total Improvement</div></div>
     </div>
     <div class="agrid">
       <div class="acard">
@@ -304,278 +306,15 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
 
 </div>
 
+<!-- PDF.js for text extraction -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
-/* ============================================================
-   DATA
-   ============================================================ */
-var SAMPLES={
-  ds:{title:"Data Scientist Resume",
-    skills:["Python","SQL","Machine Learning","TensorFlow","Pandas","NumPy","Scikit-learn","Statistics","Jupyter","R"],
-    missing:["Apache Spark","Airflow","dbt","Tableau","BigQuery"],
-    score:82,breakdown:{Skills:88,Experience:80,Projects:75,Education:85},
-    jobs:[{title:"Data Scientist",company:"Google",icon:"G",match:88},{title:"ML Engineer",company:"Meta",icon:"M",match:75},{title:"Data Analyst",company:"Stripe",icon:"S",match:70},{title:"BI Developer",company:"Salesforce",icon:"SF",match:45}],
-    suggestions:["Add Apache Spark — required in 68% of Senior Data Scientist listings.","Include 2-3 end-to-end ML projects with measurable outcomes in Projects section.","Quantify impact: 'improved model accuracy by 12% (F1: 0.91)' beats vague claims.","Add a GitHub or Kaggle portfolio link in your resume header.","Add a Data Engineering subsection (dbt, Airflow) to qualify for hybrid DS/DE roles."]},
-  fe:{title:"Frontend Developer Resume",
-    skills:["React","TypeScript","JavaScript","CSS","HTML","Figma","Webpack","Jest","Git"],
-    missing:["Next.js","GraphQL","AWS","Docker","CI/CD","Tailwind CSS"],
-    score:74,breakdown:{Skills:78,Experience:70,Projects:80,Education:68},
-    jobs:[{title:"Frontend Engineer",company:"Airbnb",icon:"A",match:82},{title:"UI Engineer",company:"Vercel",icon:"V",match:78},{title:"Full-Stack Dev",company:"Notion",icon:"N",match:62},{title:"Mobile Dev (RN)",company:"Shopify",icon:"SH",match:38}],
-    suggestions:["Add Next.js — appears in 72% of React job listings as a hard requirement.","Deploy a portfolio with live links and include Lighthouse scores (aim 90+).","Add GraphQL to unlock full-stack and API-heavy frontend roles.","Mention performance metrics: bundle size, LCP, TTI improvements with numbers.","Add CI/CD exposure (GitHub Actions, Vercel deploys) to show DevOps awareness."]},
-  be:{title:"Backend Engineer Resume",
-    skills:["Node.js","MongoDB","Express.js","REST APIs","Git","JavaScript"],
-    missing:["PostgreSQL","Docker","Kubernetes","Redis","AWS","TypeScript"],
-    score:58,breakdown:{Skills:55,Experience:50,Projects:65,Education:60},
-    jobs:[{title:"Backend Engineer",company:"Twilio",icon:"T",match:58},{title:"Full-Stack Dev",company:"Startup",icon:"*",match:65},{title:"API Developer",company:"RapidAPI",icon:"R",match:52},{title:"DevOps Engineer",company:"HashiCorp",icon:"H",match:22}],
-    suggestions:["Add PostgreSQL — #1 required database skill for backend engineering roles.","Learn Docker basics and containerize a project; table-stakes at most companies.","Quantify your Experience section — even freelance or internship numbers count.","Switch Node.js projects to TypeScript and list it prominently.","Consider AWS Cloud Practitioner certification for quick cloud credibility."]}
-};
-
-var history=[];
-try{var stored=localStorage.getItem('riq_h');if(stored)history=JSON.parse(stored);}catch(e){}
-if(!history.length){
-  history=[
-    {title:"Backend Engineer Resume",score:58,date:"2026-03-20",prev:null,key:"be"},
-    {title:"Frontend Developer Resume",score:74,date:"2026-03-28",prev:58,key:"fe"},
-    {title:"Data Scientist Resume",score:82,date:"2026-04-02",prev:74,key:"ds"},
-    {title:"Data Scientist Resume v2",score:87,date:"2026-04-05",prev:82,key:"ds"}
-  ];
-}
-
-/* ============================================================
-   NAVIGATION
-   ============================================================ */
-function showPanel(id){
-  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
-  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
-  document.getElementById('panel-'+id).classList.add('active');
-  var t=document.querySelector('[data-panel="'+id+'"]');
-  if(t)t.classList.add('active');
-  if(id==='dashboard')drawDashboard();
-  if(id==='history')renderHistory();
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-document.querySelectorAll('.tab').forEach(function(btn){
-  btn.addEventListener('click',function(){if(!btn.disabled)showPanel(btn.dataset.panel);});
-});
-
-/* ============================================================
-   FILE UPLOAD
-   ============================================================ */
-function triggerUpload(){document.getElementById('fileInput').click();}
-document.getElementById('fileInput').addEventListener('change',function(e){
-  var f=e.target.files[0];if(!f)return;
-  var n=f.name.toLowerCase();
-  var key=n.indexOf('front')>=0||n.indexOf('fe')>=0?'fe':n.indexOf('back')>=0||n.indexOf('be')>=0||n.indexOf('node')>=0?'be':'ds';
-  processResume(key);
-  e.target.value='';
-});
-var dz=document.getElementById('dropZone');
-dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('drag');});
-dz.addEventListener('dragleave',function(){dz.classList.remove('drag');});
-dz.addEventListener('drop',function(e){
-  e.preventDefault();dz.classList.remove('drag');
-  var f=e.dataTransfer.files[0];if(!f)return;
-  var n=f.name.toLowerCase();
-  var key=n.indexOf('front')>=0?'fe':n.indexOf('back')>=0||n.indexOf('node')>=0?'be':'ds';
-  processResume(key);
-});
-dz.addEventListener('click',function(e){if(e.target.tagName!=='SPAN')triggerUpload();});
-function loadSample(key){processResume(key);}
-
-/* ============================================================
-   PROCESSING ANIMATION
-   ============================================================ */
-function processResume(key){
-  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
-  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
-  document.getElementById('panel-processing').classList.add('active');
-  window.scrollTo({top:0,behavior:'smooth'});
-  var ids=['s1','s2','s3','s4','s5','s6'];
-  ids.forEach(function(id){var el=document.getElementById(id);el.className='';el.querySelector('.si').textContent='o';});
-  var i=0;
-  var iv=setInterval(function(){
-    if(i>0){var prev=document.getElementById(ids[i-1]);prev.className='done';prev.querySelector('.si').textContent='v';}
-    if(i<ids.length){document.getElementById(ids[i]).className='active';document.getElementById(ids[i]).querySelector('.si').textContent='>';}
-    i++;
-    if(i>ids.length){clearInterval(iv);setTimeout(function(){renderAnalysis(key);},400);}
-  },420);
-}
-
-/* ============================================================
-   RENDER ANALYSIS
-   ============================================================ */
-function renderAnalysis(key){
-  var d=SAMPLES[key];
-  var circ=2*Math.PI*54;
-  var pct=d.score/100;
-  setTimeout(function(){
-    document.getElementById('ringFill').style.strokeDasharray=(circ*pct).toFixed(1)+' '+(circ*(1-pct)).toFixed(1);
-  },120);
-  var cur=0;
-  var iv=setInterval(function(){
-    cur=Math.min(cur+2,d.score);
-    document.getElementById('scoreNum').textContent=cur;
-    if(cur>=d.score)clearInterval(iv);
-  },18);
-  document.getElementById('resumeTitle').textContent=d.title;
-  var vb=document.getElementById('verdictBadge');
-  if(d.score>=80){vb.textContent='Strong Resume';vb.className='verdict v-good';}
-  else if(d.score>=65){vb.textContent='Needs Improvement';vb.className='verdict v-mid';}
-  else{vb.textContent='Below ATS Threshold';vb.className='verdict v-low';}
-  var wts={Skills:40,Experience:25,Projects:20,Education:15};
-  document.getElementById('scoreBars').innerHTML=Object.keys(d.breakdown).map(function(k){
-    var v=d.breakdown[k];
-    return '<div class="bar-item"><label><span>'+k+' ('+wts[k]+'%)</span><span>'+v+'/100</span></label><div class="bar-track"><div class="bar-fill" data-t="'+v+'"></div></div></div>';
-  }).join('');
-  setTimeout(function(){document.querySelectorAll('.bar-fill[data-t]').forEach(function(el){el.style.width=el.dataset.t+'%';});},200);
-  document.getElementById('skillsFound').innerHTML=d.skills.map(function(s){return'<span class="sk">'+s+'</span>';}).join('');
-  document.getElementById('skillsMissing').innerHTML=d.missing.map(function(s){return'<span class="sk miss">'+s+'</span>';}).join('');
-  document.getElementById('jobList').innerHTML=d.jobs.map(function(j){
-    var cls=j.match>=75?'mhi':j.match>=55?'mmi':'mlo';
-    var bc=j.match>=75?'#3dd68c':j.match>=55?'#f5a623':'#e94560';
-    return'<div class="job-row"><div class="javatar">'+j.icon+'</div><div class="jmeta"><div class="jtitle">'+j.title+'</div><div class="jco">'+j.company+'</div></div><div class="jmatch"><div class="mpct '+cls+'">'+j.match+'%</div><div class="mbar"><div class="mbar-fill" style="width:'+j.match+'%;background:'+bc+'"></div></div></div></div>';
-  }).join('');
-  document.getElementById('suggList').innerHTML=d.suggestions.map(function(s){return'<li>'+s+'</li>';}).join('');
-  var prev=history.length?history[history.length-1].score:null;
-  history.push({title:d.title,score:d.score,date:new Date().toISOString().split('T')[0],prev:prev,key:key});
-  try{localStorage.setItem('riq_h',JSON.stringify(history));}catch(e){}
-  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
-  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
-  document.getElementById('panel-analysis').classList.add('active');
-  document.getElementById('tab-analysis').disabled=false;
-  document.querySelector('[data-panel="analysis"]').classList.add('active');
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-/* ============================================================
-   PURE SVG CHARTS (zero dependencies)
-   ============================================================ */
-function svgEl(tag,attrs){
-  var el=document.createElementNS('http://www.w3.org/2000/svg',tag);
-  for(var k in attrs)el.setAttribute(k,attrs[k]);
-  return el;
-}
-function svgText(content,attrs){
-  var el=svgEl('text',attrs);el.textContent=content;return el;
-}
-
-function drawTrend(scores,labels,svgId){
-  var svg=document.getElementById(svgId);
-  svg.innerHTML='';
-  var W=400,H=200,pad={t:16,r:20,b:40,l:40};
-  var iW=W-pad.l-pad.r,iH=H-pad.t-pad.b;
-  var mn=0,mx=100;
-  function sx(i){return pad.l+i*(iW/(scores.length-1||1));}
-  function sy(v){return pad.t+iH-(v-mn)/(mx-mn)*iH;}
-  // Grid lines
-  [0,25,50,75,100].forEach(function(v){
-    var y=sy(v);
-    svg.appendChild(svgEl('line',{x1:pad.l,y1:y,x2:W-pad.r,y2:y,stroke:'rgba(255,255,255,0.06)',
-      'stroke-width':'1','stroke-dasharray':v===0?'none':'4,4'}));
-    svg.appendChild(svgText(v,{x:pad.l-6,y:y+4,'text-anchor':'end','font-size':'10',fill:'#505065','font-family':'monospace'}));
-  });
-  // Area fill
-  if(scores.length>1){
-    var pts=scores.map(function(v,i){return sx(i)+','+sy(v);}).join(' ');
-    var areaD='M '+sx(0)+','+sy(scores[0])+' '+scores.map(function(v,i){return'L '+sx(i)+','+sy(v);}).join(' ')
-      +' L '+sx(scores.length-1)+','+(pad.t+iH)+' L '+sx(0)+','+(pad.t+iH)+' Z';
-    var p=svgEl('path',{d:areaD,fill:'rgba(233,69,96,0.08)'});svg.appendChild(p);
-    // Line
-    var lineD='M '+scores.map(function(v,i){return sx(i)+','+sy(v);}).join(' L ');
-    svg.appendChild(svgEl('path',{d:lineD,fill:'none',stroke:'#e94560','stroke-width':'2','stroke-linejoin':'round','stroke-linecap':'round'}));
+  if (window.pdfjsLib) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   }
-  // Points + labels
-  scores.forEach(function(v,i){
-    svg.appendChild(svgEl('circle',{cx:sx(i),cy:sy(v),r:'5',fill:'#e94560'}));
-    svg.appendChild(svgEl('circle',{cx:sx(i),cy:sy(v),r:'3',fill:'#0d0d14'}));
-    svg.appendChild(svgText(v,{x:sx(i),y:sy(v)-10,'text-anchor':'middle','font-size':'11','font-weight':'700',fill:'#f0f0f5','font-family':'monospace'}));
-    var lbl=(labels[i]||'').slice(0,12);
-    svg.appendChild(svgText(lbl,{x:sx(i),y:H-6,'text-anchor':'middle','font-size':'9',fill:'#505065','font-family':'inherit'}));
-  });
-}
-
-function drawDonut(data,colors,svgId){
-  var svg=document.getElementById(svgId);svg.innerHTML='';
-  var W=400,H=220,cx=140,cy=110,R=80,r=50;
-  var total=data.reduce(function(a,b){return a+b.val;},0);
-  var angle=-Math.PI/2;
-  data.forEach(function(d,i){
-    var sweep=2*Math.PI*d.val/total;
-    var x1=cx+R*Math.cos(angle),y1=cy+R*Math.sin(angle);
-    var x2=cx+R*Math.cos(angle+sweep),y2=cy+R*Math.sin(angle+sweep);
-    var xi1=cx+r*Math.cos(angle),yi1=cy+r*Math.sin(angle);
-    var xi2=cx+r*Math.cos(angle+sweep),yi2=cy+r*Math.sin(angle+sweep);
-    var lg=sweep>Math.PI?1:0;
-    var path='M '+x1+' '+y1+' A '+R+' '+R+' 0 '+lg+' 1 '+x2+' '+y2+' L '+xi2+' '+yi2+' A '+r+' '+r+' 0 '+lg+' 0 '+xi1+' '+yi1+' Z';
-    svg.appendChild(svgEl('path',{d:path,fill:colors[i]}));
-    angle+=sweep;
-  });
-  // Legend
-  var ly=30;
-  data.forEach(function(d,i){
-    var gy=ly+i*28;
-    svg.appendChild(svgEl('rect',{x:'230',y:gy,width:'12',height:'12',rx:'3',fill:colors[i]}));
-    svg.appendChild(svgText(d.label,{x:'250',y:gy+10,'font-size':'12',fill:'#9090a8','font-family':'inherit'}));
-    svg.appendChild(svgText(d.val+'%',{x:'390',y:gy+10,'text-anchor':'end','font-size':'12','font-weight':'700',fill:'#f0f0f5','font-family':'monospace'}));
-  });
-}
-
-function drawBars(data,svgId){
-  var svg=document.getElementById(svgId);svg.innerHTML='';
-  var W=800,H=220,pad={t:10,r:30,b:10,l:160};
-  var iW=W-pad.l-pad.r,bH=30,gap=16;
-  var maxV=100;
-  data.forEach(function(d,i){
-    var y=pad.t+i*(bH+gap);
-    var bw=d.val/maxV*iW;
-    var bc=d.val>=80?'rgba(61,214,140,0.75)':d.val>=65?'rgba(245,166,35,0.75)':'rgba(233,69,96,0.75)';
-    svg.appendChild(svgText(d.label,{x:pad.l-10,y:y+bH/2+5,'text-anchor':'end','font-size':'12',fill:'#9090a8','font-family':'inherit'}));
-    svg.appendChild(svgEl('rect',{x:pad.l,y:y,width:iW,height:bH,rx:'6',fill:'rgba(255,255,255,0.04)'}));
-    svg.appendChild(svgEl('rect',{x:pad.l,y:y,width:bw,height:bH,rx:'6',fill:bc}));
-    svg.appendChild(svgText(d.val,{x:pad.l+bw+8,y:y+bH/2+5,'font-size':'12','font-weight':'700',fill:'#f0f0f5','font-family':'monospace'}));
-  });
-}
-
-function drawDashboard(){
-  var scores=history.map(function(h){return h.score;});
-  var labels=history.map(function(h){return h.title.replace(' Resume','').slice(0,14);});
-  var avg=scores.length?Math.round(scores.reduce(function(a,b){return a+b;},0)/scores.length):0;
-  var best=scores.length?Math.max.apply(null,scores):0;
-  var improve=(scores[scores.length-1]||0)-(scores[0]||0);
-  document.getElementById('d-count').textContent=scores.length;
-  document.getElementById('d-avg').textContent=avg;
-  document.getElementById('d-best').textContent=best;
-  document.getElementById('d-improve').textContent=(improve>=0?'+':'')+improve;
-  drawTrend(scores,labels,'trendSvg');
-  drawDonut([
-    {label:'Python / JS',val:30},{label:'SQL / DB',val:20},
-    {label:'ML / AI',val:25},{label:'Infra / Cloud',val:15},{label:'Other',val:10}
-  ],['#e94560','#533483','#0f3460','#1a6b6b','#3a3a5a'],'pieSvg');
-  var barData=history.slice(-6).map(function(h){return{label:h.title.replace(' Resume','').slice(0,18),val:h.score};});
-  drawBars(barData,'barSvg');
-  document.getElementById('barSvg').setAttribute('viewBox','0 0 800 '+(barData.length*46+20));
-}
-
-/* ============================================================
-   HISTORY
-   ============================================================ */
-function renderHistory(){
-  var list=document.getElementById('histList');
-  var empty=document.getElementById('histEmpty');
-  if(!history.length){list.innerHTML='';empty.style.display='block';return;}
-  empty.style.display='none';
-  list.innerHTML=[].concat(history).reverse().map(function(h,i){
-    var idx=history.length-1-i;
-    var delta=h.prev!==null?h.score-h.prev:null;
-    var dh=delta!==null?'<div class="hdelta '+(delta>=0?'dup':'ddn')+'">'+(delta>=0?'+':'')+delta+' pts</div>':'';
-    var dt=h.date?new Date(h.date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'';
-    return'<div class="hist-item" onclick="replayHistory('+idx+')"><div class="hring">'+h.score+'</div><div class="hinfo"><div class="htitle">'+h.title+'</div><div class="hdate">'+dt+'</div></div>'+dh+'</div>';
-  }).join('');
-}
-
-function replayHistory(i){
-  var entry=history[i];
-  if(entry&&entry.key&&SAMPLES[entry.key])processResume(entry.key);
-}
 </script>
+<!-- Main app logic -->
+<script src="app.js"></script>
 </body>
 </html>
