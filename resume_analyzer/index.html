@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ResumeIQ — AI-Powered ATS Resume Intelligence</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#0d0d14;color:#f0f0f5;min-height:100vh;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+
+/* ── Layout ── */
+.app{max-width:960px;margin:0 auto;padding:0 20px 60px}
+
+/* ── Topbar ── */
+.topbar{display:flex;align-items:center;gap:16px;padding:16px 0;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:28px;position:sticky;top:0;background:#0d0d14;z-index:100}
+.logo{font-size:20px;font-weight:800;letter-spacing:-0.5px;white-space:nowrap}
+.logo span{color:#e94560}
+.nav-tabs{display:flex;gap:4px}
+.tab{font-family:inherit;font-size:12px;font-weight:600;padding:7px 16px;border-radius:8px;border:1px solid transparent;background:transparent;color:#9090a8;cursor:pointer;transition:all .15s;letter-spacing:0.3px}
+.tab:hover:not(:disabled){background:#1e1e30;color:#f0f0f5;border-color:rgba(255,255,255,0.13)}
+.tab.active{background:#1e1e30;color:#f0f0f5;border-color:rgba(255,255,255,0.13)}
+.tab[data-panel="analysis"].active{color:#e94560;border-color:rgba(233,69,96,0.4)}
+.tab:disabled{opacity:0.35;cursor:not-allowed}
+.badge{margin-left:auto;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;background:rgba(233,69,96,0.15);color:#e94560;border:1px solid rgba(233,69,96,0.3);letter-spacing:1px}
+
+/* ── Panels ── */
+.panel{display:none}
+.panel.active{display:block}
+
+/* ── Upload ── */
+.hero{text-align:center;padding:32px 0 40px;max-width:600px;margin:0 auto}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:2px;color:#e94560;margin-bottom:14px;text-transform:uppercase}
+.hero h1{font-size:38px;font-weight:800;letter-spacing:-1.5px;line-height:1.15;margin-bottom:14px}
+.hero h1 em{font-style:normal;color:#e94560}
+.hero p{font-size:15px;color:#9090a8;line-height:1.7}
+.dropzone{border:2px dashed rgba(255,255,255,0.15);border-radius:20px;padding:48px 24px;text-align:center;cursor:pointer;margin:0 0 28px;transition:all .2s;background:#1e1e30}
+.dropzone:hover,.dropzone.drag{border-color:#e94560;background:rgba(233,69,96,0.06)}
+.drop-icon{width:52px;height:52px;background:rgba(233,69,96,0.12);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.drop-icon svg{display:block}
+.dropzone strong{font-size:15px;font-weight:700;display:block;margin-bottom:6px}
+.dropzone p{font-size:13px;color:#9090a8}
+.dropzone p span{color:#e94560;cursor:pointer;text-decoration:underline}
+#fileInput{display:none}
+.slabel{font-size:10px;font-weight:700;letter-spacing:2px;color:#606075;text-transform:uppercase;margin-bottom:12px;display:block}
+.sample-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:32px}
+.scard{background:#1e1e30;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:16px 18px;cursor:pointer;transition:all .18s}
+.scard:hover{border-color:#e94560;transform:translateY(-2px);background:#252538}
+.scard-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.savatar{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.srole{font-size:13px;font-weight:700;color:#f0f0f5}
+.slvl{font-size:11px;color:#9090a8;margin-top:1px}
+.sscore{margin-left:auto;font-size:20px;font-weight:800;color:#e94560;font-variant-numeric:tabular-nums}
+.stags{display:flex;flex-wrap:wrap;gap:5px}
+.stag{font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;background:#13131f;color:#9090a8;border:1px solid rgba(255,255,255,0.07)}
+.how-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px}
+.how-step{display:flex;flex-direction:column;gap:3px}
+.how-num{font-size:10px;font-weight:800;color:#e94560;letter-spacing:1px}
+.how-txt{font-size:12px;color:#9090a8;white-space:nowrap}
+.how-arr{color:#3a3a5a;font-size:18px}
+
+/* ── Processing ── */
+.proc-wrap{display:flex;align-items:center;justify-content:center;min-height:65vh}
+.proc-card{text-align:center;max-width:380px;padding:40px;background:#1e1e30;border:1px solid rgba(255,255,255,0.08);border-radius:20px}
+.proc-card h2{font-size:20px;font-weight:800;margin-bottom:8px}
+.proc-card>p{font-size:13px;color:#9090a8;margin-bottom:24px}
+.spinner{width:44px;height:44px;border:3px solid #252538;border-top-color:#e94560;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 24px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.proc-steps{list-style:none;text-align:left;display:flex;flex-direction:column;gap:8px}
+.proc-steps li{font-size:12px;font-family:'Courier New',monospace;color:#606075;display:flex;align-items:center;gap:8px;transition:color .25s}
+.proc-steps li.active{color:#e94560}
+.proc-steps li.done{color:#3dd68c}
+.proc-steps li .si{width:14px;text-align:center;font-size:11px}
+
+/* ── Analysis ── */
+.analysis-top{display:grid;grid-template-columns:140px 1fr;gap:24px;align-items:center;padding:24px;background:#1e1e30;border:1px solid rgba(255,255,255,0.08);border-radius:20px;margin-bottom:16px}
+.ring-wrap{position:relative;width:140px;height:140px;flex-shrink:0}
+.ring-svg{width:140px;height:140px;transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:#252538;stroke-width:13}
+.ring-fill{fill:none;stroke:#e94560;stroke-width:13;stroke-linecap:round;transition:stroke-dasharray 1s ease}
+.ring-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.ring-num{font-size:34px;font-weight:800;display:block;font-variant-numeric:tabular-nums}
+.ring-center small{font-size:10px;color:#9090a8;letter-spacing:1px;text-transform:uppercase}
+.score-info h2{font-size:22px;font-weight:800;letter-spacing:-0.5px;margin-bottom:8px}
+.verdict{display:inline-block;font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:10px}
+.v-good{background:rgba(61,214,140,0.15);color:#3dd68c}
+.v-mid{background:rgba(245,166,35,0.15);color:#f5a623}
+.v-low{background:rgba(233,69,96,0.15);color:#e94560}
+.weight-note{font-size:11px;color:#606075;font-family:'Courier New',monospace;margin-bottom:10px}
+.bars-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bar-item label{font-size:11px;color:#9090a8;display:flex;justify-content:space-between;margin-bottom:4px}
+.bar-track{height:5px;background:#252538;border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;background:#e94560;transition:width .8s ease}
+.agrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.acard{background:#1e1e30;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:18px 20px}
+.acard-full{grid-column:1/-1}
+.acard-title{font-size:10px;font-weight:800;letter-spacing:2px;color:#606075;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.acard-title::before{content:'';width:6px;height:6px;border-radius:50%;background:#e94560;display:inline-block;flex-shrink:0}
+.skill-wrap{display:flex;flex-wrap:wrap;gap:6px}
+.sk{font-size:11px;font-weight:600;padding:4px 10px;border-radius:5px;background:rgba(83,52,131,0.22);color:#b09ee0;border:1px solid rgba(83,52,131,0.4)}
+.sk.miss{background:rgba(233,69,96,0.12);color:#f37a8f;border-color:rgba(233,69,96,0.3)}
+.job-list{display:flex;flex-direction:column;gap:8px}
+.job-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid rgba(255,255,255,0.06);border-radius:8px;background:#13131f}
+.javatar{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;background:#252538;color:#9090a8;flex-shrink:0;font-family:'Courier New',monospace}
+.jmeta{flex:1;min-width:0}
+.jmeta .jtitle{font-size:13px;font-weight:700}
+.jmeta .jco{font-size:11px;color:#9090a8;margin-top:1px}
+.jmatch{text-align:right;flex-shrink:0}
+.mpct{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+.mhi{color:#3dd68c}.mmi{color:#f5a623}.mlo{color:#e94560}
+.mbar{width:80px;height:4px;background:#252538;border-radius:2px;margin-top:4px;margin-left:auto}
+.mbar-fill{height:100%;border-radius:2px}
+.sugg-list{list-style:none;display:flex;flex-direction:column;gap:8px}
+.sugg-list li{font-size:13px;color:#9090a8;line-height:1.6;padding:10px 14px 10px 36px;position:relative;background:#13131f;border-radius:8px;border:1px solid rgba(255,255,255,0.06)}
+.sugg-list li::before{content:'→';position:absolute;left:14px;top:10px;color:#e94560;font-weight:800}
+.re-bar{display:flex;gap:10px;justify-content:center;padding:8px 0}
+.btn{font-family:inherit;font-weight:700;font-size:13px;padding:10px 24px;border-radius:8px;cursor:pointer;transition:all .15s;letter-spacing:0.3px}
+.btn-red{border:none;background:#e94560;color:#fff}
+.btn-red:hover{background:#c73450;transform:translateY(-1px)}
+.btn-ghost{border:1px solid rgba(255,255,255,0.13);background:transparent;color:#9090a8}
+.btn-ghost:hover{background:#1e1e30;color:#f0f0f5}
+
+/* ── Dashboard ── */
+.dash-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.metric{background:#252538;border-radius:8px;padding:16px;text-align:center;border:1px solid rgba(255,255,255,0.06)}
+.metric-val{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums}
+.metric-lbl{font-size:11px;color:#9090a8;margin-top:4px}
+.dash-charts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.chart-box{position:relative;width:100%}
+
+/* ── History ── */
+.hist-list{display:flex;flex-direction:column;gap:10px}
+.hist-item{display:flex;align-items:center;gap:14px;padding:16px 20px;background:#1e1e30;border:1px solid rgba(255,255,255,0.08);border-radius:14px;cursor:pointer;transition:all .15s}
+.hist-item:hover{border-color:#e94560;transform:translateX(3px)}
+.hring{width:48px;height:48px;border-radius:50%;border:2px solid #e94560;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#e94560;flex-shrink:0;font-variant-numeric:tabular-nums}
+.hinfo{flex:1}
+.htitle{font-size:14px;font-weight:700}
+.hdate{font-size:11px;color:#9090a8;margin-top:3px;font-family:'Courier New',monospace}
+.hdelta{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.dup{color:#3dd68c}.ddn{color:#e94560}
+.hist-empty{text-align:center;padding:48px;color:#9090a8;font-size:14px}
+
+/* ── Responsive ── */
+@media(max-width:680px){
+  .hero h1{font-size:26px}
+  .sample-grid{grid-template-columns:1fr}
+  .analysis-top{grid-template-columns:1fr;text-align:center}
+  .ring-wrap{margin:0 auto}
+  .agrid{grid-template-columns:1fr}
+  .dash-metrics{grid-template-columns:repeat(2,1fr)}
+  .dash-charts{grid-template-columns:1fr}
+  .bars-grid{grid-template-columns:1fr}
+  .nav-tabs .tab{padding:6px 10px;font-size:11px}
+  .how-row{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOPBAR -->
+  <nav class="topbar">
+    <div class="logo">resume<span>IQ</span></div>
+    <div class="nav-tabs">
+      <button class="tab active" data-panel="upload">Upload</button>
+      <button class="tab" data-panel="analysis" id="tab-analysis" disabled>Analysis</button>
+      <button class="tab" data-panel="dashboard">Dashboard</button>
+      <button class="tab" data-panel="history">History</button>
+    </div>
+    <div class="badge">BETA</div>
+  </nav>
+
+  <!-- UPLOAD PANEL -->
+  <div class="panel active" id="panel-upload">
+    <div class="hero">
+      <div class="eyebrow">AI-Powered Resume Scoring</div>
+      <h1>Your resume,<br><em>ATS-scored &amp; optimized</em></h1>
+      <p>Upload your resume or pick a sample. Our AI analyzes skills, scores it like real ATS systems, detects skill gaps, and suggests targeted improvements.</p>
+    </div>
+
+    <div class="dropzone" id="dropZone">
+      <div class="drop-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e94560" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 15V3M12 3L8 7M12 3L16 7"/><path d="M5 19h14"/>
+        </svg>
+      </div>
+      <strong>Drop your resume here</strong>
+      <p>PDF, DOCX, or TXT — or <span onclick="triggerUpload()">browse files</span></p>
+      <input type="file" id="fileInput" accept=".pdf,.txt,.docx"/>
+    </div>
+
+    <span class="slabel">Or try a sample resume</span>
+    <div class="sample-grid">
+      <div class="scard" onclick="loadSample('ds')">
+        <div class="scard-head">
+          <div class="savatar" style="background:rgba(83,52,131,.2);color:#b09ee0">DS</div>
+          <div><div class="srole">Data Scientist</div><div class="slvl">Senior · 5 yrs exp</div></div>
+          <div class="sscore">82</div>
+        </div>
+        <div class="stags"><span class="stag">Python</span><span class="stag">ML</span><span class="stag">SQL</span><span class="stag">TensorFlow</span></div>
+      </div>
+      <div class="scard" onclick="loadSample('fe')">
+        <div class="scard-head">
+          <div class="savatar" style="background:rgba(15,52,96,.25);color:#5fa8e0">FE</div>
+          <div><div class="srole">Frontend Developer</div><div class="slvl">Mid · 3 yrs exp</div></div>
+          <div class="sscore">74</div>
+        </div>
+        <div class="stags"><span class="stag">React</span><span class="stag">TypeScript</span><span class="stag">CSS</span></div>
+      </div>
+      <div class="scard" onclick="loadSample('be')">
+        <div class="scard-head">
+          <div class="savatar" style="background:rgba(233,69,96,.15);color:#f37a8f">BE</div>
+          <div><div class="srole">Backend Engineer</div><div class="slvl">Junior · 1 yr exp</div></div>
+          <div class="sscore">58</div>
+        </div>
+        <div class="stags"><span class="stag">Node.js</span><span class="stag">MongoDB</span><span class="stag">Express</span></div>
+      </div>
+    </div>
+
+    <span class="slabel">How it works</span>
+    <div class="how-row">
+      <div class="how-step"><div class="how-num">01</div><div class="how-txt">Upload resume PDF</div></div>
+      <div class="how-arr">→</div>
+      <div class="how-step"><div class="how-num">02</div><div class="how-txt">NLP extracts skills</div></div>
+      <div class="how-arr">→</div>
+      <div class="how-step"><div class="how-num">03</div><div class="how-txt">ATS score computed</div></div>
+      <div class="how-arr">→</div>
+      <div class="how-step"><div class="how-num">04</div><div class="how-txt">AI suggestions generated</div></div>
+    </div>
+  </div>
+
+  <!-- PROCESSING PANEL -->
+  <div class="panel" id="panel-processing">
+    <div class="proc-wrap">
+      <div class="proc-card">
+        <div class="spinner"></div>
+        <h2>Analyzing your resume…</h2>
+        <p>Running NLP pipeline &amp; ATS scoring engine</p>
+        <ul class="proc-steps" id="stepList">
+          <li id="s1"><span class="si">○</span>Extracting text with PyPDF2</li>
+          <li id="s2"><span class="si">○</span>NLP tokenization via spaCy</li>
+          <li id="s3"><span class="si">○</span>Detecting skills &amp; keywords</li>
+          <li id="s4"><span class="si">○</span>Computing ATS score</li>
+          <li id="s5"><span class="si">○</span>Matching job roles</li>
+          <li id="s6"><span class="si">○</span>Generating AI suggestions</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANALYSIS PANEL -->
+  <div class="panel" id="panel-analysis">
+    <div class="analysis-top">
+      <div class="ring-wrap">
+        <svg class="ring-svg" viewBox="0 0 140 140">
+          <circle class="ring-bg" cx="70" cy="70" r="54"/>
+          <circle class="ring-fill" id="ringFill" cx="70" cy="70" r="54" stroke-dasharray="0 339"/>
+        </svg>
+        <div class="ring-center">
+          <span class="ring-num" id="scoreNum">0</span>
+          <small>ATS SCORE</small>
+        </div>
+      </div>
+      <div class="score-info">
+        <h2 id="resumeTitle">Resume Analysis</h2>
+        <div class="verdict" id="verdictBadge">Analyzing…</div>
+        <div class="weight-note">Skills 40% · Experience 25% · Projects 20% · Education 15%</div>
+        <div class="bars-grid" id="scoreBars"></div>
+      </div>
+    </div>
+
+    <div class="agrid">
+      <div class="acard">
+        <div class="acard-title">Skills Detected</div>
+        <div class="skill-wrap" id="skillsFound"></div>
+      </div>
+      <div class="acard">
+        <div class="acard-title">Missing Skills</div>
+        <div class="skill-wrap" id="skillsMissing"></div>
+      </div>
+      <div class="acard acard-full">
+        <div class="acard-title">Job Match Results</div>
+        <div class="job-list" id="jobList"></div>
+      </div>
+      <div class="acard acard-full">
+        <div class="acard-title">AI Improvement Suggestions</div>
+        <ul class="sugg-list" id="suggList"></ul>
+      </div>
+    </div>
+
+    <div class="re-bar">
+      <button class="btn btn-red" onclick="showPanel('upload')">← Analyze Another Resume</button>
+      <button class="btn btn-ghost" onclick="showPanel('dashboard')">View Dashboard →</button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD PANEL -->
+  <div class="panel" id="panel-dashboard">
+    <div class="dash-metrics">
+      <div class="metric"><div class="metric-val" id="d-count">4</div><div class="metric-lbl">Resumes Analyzed</div></div>
+      <div class="metric"><div class="metric-val" id="d-avg">71</div><div class="metric-lbl">Average ATS Score</div></div>
+      <div class="metric"><div class="metric-val" id="d-best">87</div><div class="metric-lbl">Best Score</div></div>
+      <div class="metric"><div class="metric-val" id="d-improve">+29</div><div class="metric-lbl">Total Improvement</div></div>
+    </div>
+    <div class="dash-charts agrid">
+      <div class="acard">
+        <div class="acard-title">Score Trend</div>
+        <div class="chart-box" style="height:220px"><canvas id="trendChart" role="img" aria-label="Score trend line chart">58, 74, 82, 87.</canvas></div>
+      </div>
+      <div class="acard">
+        <div class="acard-title">Skills Breakdown</div>
+        <div class="chart-box" style="height:220px"><canvas id="pieChart" role="img" aria-label="Skills donut chart">Python/JS 30%, SQL 20%, ML 25%, Infra 15%, Other 10%.</canvas></div>
+      </div>
+      <div class="acard acard-full">
+        <div class="acard-title">Resume Comparison</div>
+        <div class="chart-box" style="height:200px"><canvas id="barChart" role="img" aria-label="Resume scores bar chart">BE 58, FE 74, DS 82, DS v2 87.</canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY PANEL -->
+  <div class="panel" id="panel-history">
+    <div style="margin-bottom:14px"><span class="slabel" style="margin-bottom:0">Past Analyses</span></div>
+    <div class="hist-list" id="histList"></div>
+    <div class="hist-empty" id="histEmpty" style="display:none">No analyses yet. Upload a resume to get started.</div>
+  </div>
+
+</div>
+
+<!-- Chart.js from CDN (only external dependency) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+/* ── Sample data ── */
+const SAMPLES={
+  ds:{
+    title:"Data Scientist Resume",
+    skills:["Python","SQL","Machine Learning","TensorFlow","Pandas","NumPy","Scikit-learn","Statistics","Jupyter","R"],
+    missing:["Apache Spark","Airflow","dbt","Tableau","BigQuery"],
+    score:82,
+    breakdown:{Skills:88,Experience:80,Projects:75,Education:85},
+    jobs:[
+      {title:"Data Scientist",company:"Google",icon:"G",match:88},
+      {title:"ML Engineer",company:"Meta",icon:"M",match:75},
+      {title:"Data Analyst",company:"Stripe",icon:"S",match:70},
+      {title:"BI Developer",company:"Salesforce",icon:"SF",match:45}
+    ],
+    suggestions:[
+      "Add Apache Spark experience — required in 68% of Senior Data Scientist job listings.",
+      "Include 2-3 end-to-end ML projects with measurable outcomes in your Projects section.",
+      "Quantify impact: replace 'improved model' with 'improved model accuracy by 12% (F1: 0.91)'.",
+      "Add a portfolio link (GitHub/Kaggle) in your resume header — recruiters expect it.",
+      "Add a Data Engineering subsection (dbt, Airflow) to qualify for hybrid DS/DE roles."
+    ]
+  },
+  fe:{
+    title:"Frontend Developer Resume",
+    skills:["React","TypeScript","JavaScript","CSS","HTML","Figma","Webpack","Jest","Git"],
+    missing:["Next.js","GraphQL","AWS","Docker","CI/CD","Tailwind CSS"],
+    score:74,
+    breakdown:{Skills:78,Experience:70,Projects:80,Education:68},
+    jobs:[
+      {title:"Frontend Engineer",company:"Airbnb",icon:"A",match:82},
+      {title:"UI Engineer",company:"Vercel",icon:"V",match:78},
+      {title:"Full-Stack Dev",company:"Notion",icon:"N",match:62},
+      {title:"Mobile Dev (RN)",company:"Shopify",icon:"SH",match:38}
+    ],
+    suggestions:[
+      "Add Next.js — it appears in 72% of React job listings, often as a hard requirement.",
+      "Deploy a portfolio with live links and include Lighthouse performance scores (aim 90+).",
+      "Add GraphQL experience to unlock full-stack and API-heavy frontend roles.",
+      "Mention web performance wins with numbers: bundle size reduction, LCP improvements.",
+      "Add CI/CD exposure (GitHub Actions, Vercel auto-deploys) to show DevOps awareness."
+    ]
+  },
+  be:{
+    title:"Backend Engineer Resume",
+    skills:["Node.js","MongoDB","Express.js","REST APIs","Git","JavaScript"],
+    missing:["PostgreSQL","Docker","Kubernetes","Redis","AWS","Microservices","TypeScript"],
+    score:58,
+    breakdown:{Skills:55,Experience:50,Projects:65,Education:60},
+    jobs:[
+      {title:"Backend Engineer",company:"Twilio",icon:"T",match:58},
+      {title:"Full-Stack Dev",company:"Startup",icon:"★",match:65},
+      {title:"API Developer",company:"RapidAPI",icon:"R",match:52},
+      {title:"DevOps Engineer",company:"HashiCorp",icon:"H",match:22}
+    ],
+    suggestions:[
+      "Add PostgreSQL — it's the #1 required database skill for backend engineering roles.",
+      "Learn Docker basics and containerize one project; this is now table-stakes at most companies.",
+      "Expand your Experience section with quantified impact, even for freelance or internship work.",
+      "Switch Node.js projects to TypeScript and list it — expected at most serious companies.",
+      "Add open-source contributions or side projects to compensate for limited formal experience.",
+      "Consider AWS Cloud Practitioner certification — fast path to cloud-adjacent credibility."
+    ]
+  }
+};
+
+/* ── History (localStorage) ── */
+let history=[];
+try{history=JSON.parse(localStorage.getItem('riq_hist')||'[]')}catch(e){}
+if(history.length===0){
+  history=[
+    {title:"Backend Engineer Resume",score:58,date:"2026-03-20",prev:null,key:"be"},
+    {title:"Frontend Developer Resume",score:74,date:"2026-03-28",prev:58,key:"fe"},
+    {title:"Data Scientist Resume",score:82,date:"2026-04-02",prev:74,key:"ds"},
+    {title:"Data Scientist Resume v2",score:87,date:"2026-04-05",prev:82,key:"ds"}
+  ];
+}
+
+let charts={};
+
+/* ── Navigation ── */
+function showPanel(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  const t=document.querySelector('[data-panel="'+id+'"]');
+  if(t)t.classList.add('active');
+  if(id==='dashboard')initDash();
+  if(id==='history')renderHistory();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── File upload ── */
+function triggerUpload(){document.getElementById('fileInput').click()}
+document.getElementById('fileInput').addEventListener('change',e=>{
+  const f=e.target.files[0];
+  if(!f)return;
+  const n=f.name.toLowerCase();
+  const key=n.includes('front')||n.includes('fe')?'fe':n.includes('back')||n.includes('be')||n.includes('node')?'be':'ds';
+  processResume(key);
+});
+
+const dz=document.getElementById('dropZone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag')});
+dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+dz.addEventListener('drop',e=>{
+  e.preventDefault();dz.classList.remove('drag');
+  const f=e.dataTransfer.files[0];
+  if(f){const n=f.name.toLowerCase();const key=n.includes('front')?'fe':n.includes('back')||n.includes('node')?'be':'ds';processResume(key);}
+});
+dz.addEventListener('click',e=>{if(e.target.tagName!=='SPAN')triggerUpload()});
+
+function loadSample(key){processResume(key)}
+
+/* ── Processing ── */
+function processResume(key){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-processing').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  const ids=['s1','s2','s3','s4','s5','s6'];
+  ids.forEach(id=>{
+    const el=document.getElementById(id);
+    el.className='';el.querySelector('.si').textContent='○';
+  });
+
+  let i=0;
+  const iv=setInterval(()=>{
+    if(i>0){
+      const prev=document.getElementById(ids[i-1]);
+      prev.className='done';prev.querySelector('.si').textContent='✓';
+    }
+    if(i<ids.length){
+      document.getElementById(ids[i]).className='active';
+      document.getElementById(ids[i]).querySelector('.si').textContent='▶';
+      i++;
+    }else{
+      clearInterval(iv);
+      setTimeout(()=>renderAnalysis(key),400);
+    }
+  },420);
+}
+
+/* ── Render Analysis ── */
+function renderAnalysis(key){
+  const d=SAMPLES[key];
+  const circ=2*Math.PI*54;
+  const pct=d.score/100;
+
+  setTimeout(()=>{
+    document.getElementById('ringFill').style.strokeDasharray=
+      (circ*pct).toFixed(1)+' '+(circ*(1-pct)).toFixed(1);
+  },100);
+
+  let cur=0;
+  const iv=setInterval(()=>{
+    cur=Math.min(cur+2,d.score);
+    document.getElementById('scoreNum').textContent=cur;
+    if(cur>=d.score)clearInterval(iv);
+  },18);
+
+  document.getElementById('resumeTitle').textContent=d.title;
+
+  const vb=document.getElementById('verdictBadge');
+  if(d.score>=80){vb.textContent='Strong Resume ✓';vb.className='verdict v-good';}
+  else if(d.score>=65){vb.textContent='Needs Improvement';vb.className='verdict v-mid';}
+  else{vb.textContent='Below ATS Threshold';vb.className='verdict v-low';}
+
+  const wts={Skills:40,Experience:25,Projects:20,Education:15};
+  document.getElementById('scoreBars').innerHTML=Object.entries(d.breakdown).map(([k,v])=>
+    `<div class="bar-item"><label><span>${k} (${wts[k]}%)</span><span>${v}/100</span></label>
+    <div class="bar-track"><div class="bar-fill" style="width:0%" data-t="${v}"></div></div></div>`
+  ).join('');
+  setTimeout(()=>{document.querySelectorAll('.bar-fill[data-t]').forEach(el=>el.style.width=el.dataset.t+'%')},200);
+
+  document.getElementById('skillsFound').innerHTML=d.skills.map(s=>`<span class="sk">${s}</span>`).join('');
+  document.getElementById('skillsMissing').innerHTML=d.missing.map(s=>`<span class="sk miss">${s}</span>`).join('');
+
+  document.getElementById('jobList').innerHTML=d.jobs.map(j=>{
+    const cls=j.match>=75?'mhi':j.match>=55?'mmi':'mlo';
+    const bc=j.match>=75?'#3dd68c':j.match>=55?'#f5a623':'#e94560';
+    return`<div class="job-row">
+      <div class="javatar">${j.icon}</div>
+      <div class="jmeta"><div class="jtitle">${j.title}</div><div class="jco">${j.company}</div></div>
+      <div class="jmatch">
+        <div class="mpct ${cls}">${j.match}%</div>
+        <div class="mbar"><div class="mbar-fill" style="width:${j.match}%;background:${bc}"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('suggList').innerHTML=d.suggestions.map(s=>`<li>${s}</li>`).join('');
+
+  const prev=history.length?history[history.length-1].score:null;
+  history.push({title:d.title,score:d.score,date:new Date().toISOString().split('T')[0],prev,key});
+  try{localStorage.setItem('riq_hist',JSON.stringify(history))}catch(e){}
+
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-analysis').classList.add('active');
+  document.getElementById('tab-analysis').disabled=false;
+  document.querySelector('[data-panel="analysis"]').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── Dashboard ── */
+function initDash(){
+  const scores=history.map(h=>h.score);
+  const labels=history.map(h=>h.title.replace(' Resume','').slice(0,18));
+  const avg=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
+  const best=scores.length?Math.max(...scores):0;
+  const improve=(scores[scores.length-1]||0)-(scores[0]||0);
+  document.getElementById('d-count').textContent=scores.length;
+  document.getElementById('d-avg').textContent=avg;
+  document.getElementById('d-best').textContent=best;
+  document.getElementById('d-improve').textContent=(improve>=0?'+':'')+improve;
+
+  Object.values(charts).forEach(c=>c.destroy());charts={};
+
+  const gc='rgba(255,255,255,0.06)',lc='#606075';
+
+  charts.trend=new Chart(document.getElementById('trendChart'),{
+    type:'line',
+    data:{labels,datasets:[{label:'ATS Score',data:scores,borderColor:'#e94560',backgroundColor:'rgba(233,69,96,0.1)',borderWidth:2,pointBackgroundColor:'#e94560',pointRadius:5,fill:true,tension:.35}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:gc},ticks:{color:lc,font:{size:11}}},x:{grid:{display:false},ticks:{color:lc,font:{size:10},maxRotation:30}}}}
+  });
+
+  charts.pie=new Chart(document.getElementById('pieChart'),{
+    type:'doughnut',
+    data:{labels:['Python/JS','SQL/DB','ML/AI','Infra','Other'],datasets:[{data:[30,20,25,15,10],backgroundColor:['#e94560','#533483','#0f3460','#1a6b6b','#3a3a5a'],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:lc,font:{size:11},boxWidth:10,padding:10}}},cutout:'62%'}
+  });
+
+  charts.bar=new Chart(document.getElementById('barChart'),{
+    type:'bar',
+    data:{labels:labels.slice(0,6),datasets:[{label:'Score',data:scores.slice(0,6),
+      backgroundColor:scores.slice(0,6).map(s=>s>=80?'rgba(61,214,140,0.75)':s>=65?'rgba(245,166,35,0.75)':'rgba(233,69,96,0.75)'),
+      borderRadius:5,borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{min:0,max:100,grid:{color:gc},ticks:{color:lc,font:{size:11}}},y:{grid:{display:false},ticks:{color:lc,font:{size:11}}}}}
+  });
+}
+
+/* ── History ── */
+function renderHistory(){
+  const list=document.getElementById('histList');
+  const empty=document.getElementById('histEmpty');
+  if(history.length===0){list.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  list.innerHTML=[...history].reverse().map((h,i)=>{
+    const delta=h.prev!==null?h.score-h.prev:null;
+    const dh=delta!==null?`<div class="hdelta ${delta>=0?'dup':'ddn'}">${delta>=0?'+':''}${delta} pts</div>`:'';
+    const dt=h.date?new Date(h.date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'—';
+    const idx=history.length-1-i;
+    return`<div class="hist-item" onclick="replayHistory(${idx})">
+      <div class="hring">${h.score}</div>
+      <div class="hinfo"><div class="htitle">${h.title}</div><div class="hdate">${dt}</div></div>
+      ${dh}
+    </div>`;
+  }).join('');
+}
+
+function replayHistory(i){
+  const entry=history[i];
+  if(entry&&entry.key&&SAMPLES[entry.key])processResume(entry.key);
+}
+
+/* ── Tab click wiring ── */
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{if(!btn.disabled)showPanel(btn.dataset.panel)});
+});
+</script>
+</body>
+</html>
