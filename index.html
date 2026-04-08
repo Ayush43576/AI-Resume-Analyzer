@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>ResumeIQ — AI-Powered ATS Resume Intelligence</title>
+<title>ResumeIQ — AI Resume Analyzer</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:#0d0d14;color:#f0f0f5;min-height:100vh;-webkit-font-smoothing:antialiased}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0d0d14;color:#f0f0f5;min-height:100vh;-webkit-font-smoothing:antialiased}
 .app{max-width:960px;margin:0 auto;padding:0 20px 60px}
+
 /* Topbar */
 .topbar{display:flex;align-items:center;gap:12px;padding:16px 0;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:28px;position:sticky;top:0;background:#0d0d14;z-index:100;flex-wrap:wrap}
-.logo{font-size:20px;font-weight:800;letter-spacing:-0.5px}
-.logo span{color:#e94560}
+.logo{font-size:20px;font-weight:800;letter-spacing:-0.5px}.logo span{color:#e94560}
 .nav-tabs{display:flex;gap:4px}
 .tab{font-family:inherit;font-size:12px;font-weight:700;padding:7px 15px;border-radius:7px;border:1px solid transparent;background:transparent;color:#9090a8;cursor:pointer;transition:all .15s}
 .tab:hover:not(:disabled){background:#1e1e30;color:#f0f0f5;border-color:rgba(255,255,255,0.12)}
@@ -19,14 +19,20 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
 .tab[data-panel="analysis"].active{color:#e94560;border-color:rgba(233,69,96,0.4)}
 .tab:disabled{opacity:0.3;cursor:not-allowed}
 .badge{margin-left:auto;font-size:10px;font-weight:800;padding:3px 8px;border-radius:4px;background:rgba(233,69,96,0.15);color:#e94560;border:1px solid rgba(233,69,96,0.3);letter-spacing:1px}
+
 /* Panels */
 .panel{display:none}.panel.active{display:block}
+
 /* Hero */
 .hero{text-align:center;padding:36px 0 44px;max-width:580px;margin:0 auto}
 .eyebrow{font-size:11px;font-weight:800;letter-spacing:2.5px;color:#e94560;margin-bottom:16px;text-transform:uppercase}
 .hero h1{font-size:40px;font-weight:800;letter-spacing:-1.5px;line-height:1.12;margin-bottom:14px}
 .hero h1 em{font-style:normal;color:#e94560}
 .hero p{font-size:15px;color:#9090a8;line-height:1.75}
+
+/* Error banner */
+#error-banner{display:none;background:rgba(233,69,96,0.12);border:1px solid rgba(233,69,96,0.4);border-radius:10px;color:#f37a8f;padding:12px 18px;margin-bottom:16px;font-size:13px}
+
 /* Dropzone */
 .dropzone{border:2px dashed rgba(255,255,255,0.14);border-radius:20px;padding:52px 24px;text-align:center;cursor:pointer;margin:0 0 28px;transition:all .2s;background:#1a1a28}
 .dropzone:hover,.dropzone.drag{border-color:#e94560;background:rgba(233,69,96,0.05)}
@@ -35,27 +41,28 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
 .dropzone p{font-size:13px;color:#9090a8}
 .dropzone p span{color:#e94560;text-decoration:underline;cursor:pointer}
 #fileInput{display:none}
-/* Error banner */
-#error-banner{display:none;background:rgba(233,69,96,0.12);border:1px solid rgba(233,69,96,0.4);border-radius:10px;color:#f37a8f;padding:12px 18px;margin-bottom:16px;font-size:13px;align-items:center;gap:10px}
+
 /* Labels */
 .slabel{font-size:10px;font-weight:800;letter-spacing:2px;color:#505065;text-transform:uppercase;margin-bottom:12px;display:block}
+
 /* Sample cards */
 .sample-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:32px}
 .scard{background:#1a1a28;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:16px 18px;cursor:pointer;transition:all .18s}
 .scard:hover{border-color:#e94560;transform:translateY(-2px);background:#22223a}
 .scard-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .savatar{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
-.srole{font-size:13px;font-weight:700}
-.slvl{font-size:11px;color:#9090a8;margin-top:2px}
+.srole{font-size:13px;font-weight:700}.slvl{font-size:11px;color:#9090a8;margin-top:2px}
 .sscore{margin-left:auto;font-size:22px;font-weight:800;color:#e94560}
 .stags{display:flex;flex-wrap:wrap;gap:5px}
 .stag{font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;background:#111120;color:#9090a8;border:1px solid rgba(255,255,255,0.07)}
+
 /* How it works */
 .how-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px}
 .how-step{display:flex;flex-direction:column;gap:3px}
 .how-num{font-size:10px;font-weight:800;color:#e94560;letter-spacing:1px}
 .how-txt{font-size:12px;color:#9090a8;white-space:nowrap}
 .how-arr{color:#333350;font-size:18px}
+
 /* Processing */
 .proc-wrap{display:flex;align-items:center;justify-content:center;min-height:65vh}
 .proc-card{text-align:center;max-width:380px;padding:40px;background:#1a1a28;border:1px solid rgba(255,255,255,0.08);border-radius:20px;width:100%}
@@ -64,10 +71,11 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
 .spinner{width:44px;height:44px;border:3px solid #252538;border-top-color:#e94560;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 24px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .proc-steps{list-style:none;text-align:left;display:flex;flex-direction:column;gap:9px}
-.proc-steps li{font-size:12px;font-family:'Courier New',Courier,monospace;color:#505065;display:flex;align-items:center;gap:9px;transition:color .25s}
+.proc-steps li{font-size:12px;font-family:'Courier New',monospace;color:#505065;display:flex;align-items:center;gap:9px;transition:color .25s}
 .proc-steps li.active{color:#e94560}
 .proc-steps li.done{color:#3dd68c}
 .proc-steps li .si{width:14px;text-align:center}
+
 /* Analysis top */
 .analysis-top{display:grid;grid-template-columns:140px 1fr;gap:24px;align-items:center;padding:24px;background:#1a1a28;border:1px solid rgba(255,255,255,0.08);border-radius:20px;margin-bottom:14px}
 .ring-wrap{position:relative;width:140px;height:140px;flex-shrink:0}
@@ -87,6 +95,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
 .bar-item label{font-size:11px;color:#9090a8;display:flex;justify-content:space-between;margin-bottom:5px}
 .bar-track{height:5px;background:#252538;border-radius:3px;overflow:hidden}
 .bar-fill{height:100%;border-radius:3px;background:#e94560;width:0%;transition:width .9s ease}
+
 /* Analysis grid */
 .agrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
 .acard{background:#1a1a28;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:18px 20px}
@@ -96,6 +105,8 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
 .skill-wrap{display:flex;flex-wrap:wrap;gap:6px}
 .sk{font-size:11px;font-weight:600;padding:4px 10px;border-radius:5px;background:rgba(83,52,131,0.2);color:#b09ee0;border:1px solid rgba(83,52,131,0.35)}
 .sk.miss{background:rgba(233,69,96,0.1);color:#f37a8f;border-color:rgba(233,69,96,0.3)}
+
+/* Job list */
 .job-list{display:flex;flex-direction:column;gap:8px}
 .job-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid rgba(255,255,255,0.06);border-radius:8px;background:#111120}
 .javatar{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;background:#252538;color:#9090a8;flex-shrink:0}
@@ -107,22 +118,27 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
 .mhi{color:#3dd68c}.mmi{color:#f5a623}.mlo{color:#e94560}
 .mbar{width:80px;height:4px;background:#252538;border-radius:2px;margin-top:5px;margin-left:auto}
 .mbar-fill{height:100%;border-radius:2px}
+
+/* Suggestions */
 .sugg-list{list-style:none;display:flex;flex-direction:column;gap:8px}
 .sugg-list li{font-size:13px;color:#9090a8;line-height:1.6;padding:10px 14px 10px 36px;position:relative;background:#111120;border-radius:8px;border:1px solid rgba(255,255,255,0.06)}
 .sugg-list li::before{content:'→';position:absolute;left:14px;top:10px;color:#e94560;font-weight:800}
+
 /* Buttons */
 .re-bar{display:flex;gap:10px;justify-content:center;padding:8px 0}
-.btn{font-family:inherit;font-weight:700;font-size:13px;padding:11px 26px;border-radius:8px;cursor:pointer;transition:all .15s;letter-spacing:0.2px}
+.btn{font-family:inherit;font-weight:700;font-size:13px;padding:11px 26px;border-radius:8px;cursor:pointer;transition:all .15s}
 .btn-red{border:none;background:#e94560;color:#fff}
 .btn-red:hover{background:#c73450;transform:translateY(-1px)}
 .btn-ghost{border:1px solid rgba(255,255,255,0.13);background:transparent;color:#9090a8}
 .btn-ghost:hover{background:#1a1a28;color:#f0f0f5}
+
 /* Dashboard */
 .dash-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
 .metric{background:#1a1a28;border-radius:10px;padding:16px;text-align:center;border:1px solid rgba(255,255,255,0.07)}
 .metric-val{font-size:30px;font-weight:800}
 .metric-lbl{font-size:11px;color:#9090a8;margin-top:4px}
 .chart-svg{width:100%;display:block}
+
 /* History */
 .hist-list{display:flex;flex-direction:column;gap:10px}
 .hist-item{display:flex;align-items:center;gap:14px;padding:16px 20px;background:#1a1a28;border:1px solid rgba(255,255,255,0.07);border-radius:14px;cursor:pointer;transition:all .15s}
@@ -134,6 +150,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
 .hdelta{font-size:13px;font-weight:800}
 .dup{color:#3dd68c}.ddn{color:#e94560}
 .hist-empty{text-align:center;padding:48px;color:#9090a8;font-size:14px}
+
 @media(max-width:680px){
   .hero h1{font-size:28px}
   .sample-grid{grid-template-columns:1fr}
@@ -142,14 +159,12 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
   .agrid,.bars-grid{grid-template-columns:1fr}
   .dash-metrics{grid-template-columns:repeat(2,1fr)}
   .nav-tabs .tab{padding:6px 10px;font-size:11px}
-  .how-row{flex-direction:column;align-items:flex-start}
 }
 </style>
 </head>
 <body>
 <div class="app">
 
-  <!-- TOPBAR -->
   <nav class="topbar">
     <div class="logo">resume<span>IQ</span></div>
     <div class="nav-tabs">
@@ -166,7 +181,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
     <div class="hero">
       <div class="eyebrow">AI-Powered Resume Scoring</div>
       <h1>Your resume,<br><em>ATS-scored &amp; optimized</em></h1>
-      <p>Upload your resume and Claude AI analyzes your skills, scores it like real ATS systems, detects skill gaps, and gives targeted improvement advice.</p>
+      <p>Upload your resume. Claude AI reads it, scores it like a real ATS system, finds skill gaps, and gives targeted improvement advice.</p>
     </div>
 
     <div id="error-banner"></div>
@@ -188,12 +203,12 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
           <div><div class="srole">Data Scientist</div><div class="slvl">Senior &middot; 5 yrs</div></div>
           <div class="sscore">82</div>
         </div>
-        <div class="stags"><span class="stag">Python</span><span class="stag">ML</span><span class="stag">SQL</span><span class="stag">TensorFlow</span></div>
+        <div class="stags"><span class="stag">Python</span><span class="stag">ML</span><span class="stag">SQL</span></div>
       </div>
       <div class="scard" onclick="loadSample('fe')">
         <div class="scard-head">
           <div class="savatar" style="background:rgba(15,52,96,.25);color:#5fa8e0">FE</div>
-          <div><div class="srole">Frontend Developer</div><div class="slvl">Mid &middot; 3 yrs</div></div>
+          <div><div class="srole">Frontend Dev</div><div class="slvl">Mid &middot; 3 yrs</div></div>
           <div class="sscore">74</div>
         </div>
         <div class="stags"><span class="stag">React</span><span class="stag">TypeScript</span><span class="stag">CSS</span></div>
@@ -212,7 +227,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
     <div class="how-row">
       <div class="how-step"><div class="how-num">01</div><div class="how-txt">Upload resume PDF</div></div>
       <div class="how-arr">&#8594;</div>
-      <div class="how-step"><div class="how-num">02</div><div class="how-txt">Claude reads & parses</div></div>
+      <div class="how-step"><div class="how-num">02</div><div class="how-txt">Claude reads &amp; parses</div></div>
       <div class="how-arr">&#8594;</div>
       <div class="how-step"><div class="how-num">03</div><div class="how-txt">ATS score computed</div></div>
       <div class="how-arr">&#8594;</div>
@@ -227,13 +242,13 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
         <div class="spinner"></div>
         <h2>Analyzing your resume&hellip;</h2>
         <p>Claude AI is reading and scoring your resume</p>
-        <ul class="proc-steps" id="stepList">
-          <li id="s1"><span class="si">o</span>Reading resume file</li>
-          <li id="s2"><span class="si">o</span>Extracting text content</li>
-          <li id="s3"><span class="si">o</span>Detecting skills &amp; keywords</li>
-          <li id="s4"><span class="si">o</span>Computing ATS score</li>
-          <li id="s5"><span class="si">o</span>Matching job roles</li>
-          <li id="s6"><span class="si">o</span>Generating AI suggestions</li>
+        <ul class="proc-steps">
+          <li id="s1"><span class="si">o</span> Reading resume file</li>
+          <li id="s2"><span class="si">o</span> Extracting text content</li>
+          <li id="s3"><span class="si">o</span> Detecting skills &amp; keywords</li>
+          <li id="s4"><span class="si">o</span> Computing ATS score</li>
+          <li id="s5"><span class="si">o</span> Matching job roles</li>
+          <li id="s6"><span class="si">o</span> Generating AI suggestions</li>
         </ul>
       </div>
     </div>
@@ -268,7 +283,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
     </div>
 
     <div class="re-bar">
-      <button class="btn btn-red" onclick="showPanel('upload')">&#8592; Analyze Another Resume</button>
+      <button class="btn btn-red" onclick="showPanel('upload')">&#8592; Analyze Another</button>
       <button class="btn btn-ghost" onclick="showPanel('dashboard')">View Dashboard &#8594;</button>
     </div>
   </div>
@@ -276,24 +291,15 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
   <!-- DASHBOARD -->
   <div class="panel" id="panel-dashboard">
     <div class="dash-metrics">
-      <div class="metric"><div class="metric-val" id="d-count">0</div><div class="metric-lbl">Resumes Analyzed</div></div>
-      <div class="metric"><div class="metric-val" id="d-avg">0</div><div class="metric-lbl">Avg ATS Score</div></div>
+      <div class="metric"><div class="metric-val" id="d-count">0</div><div class="metric-lbl">Analyzed</div></div>
+      <div class="metric"><div class="metric-val" id="d-avg">0</div><div class="metric-lbl">Avg Score</div></div>
       <div class="metric"><div class="metric-val" id="d-best">0</div><div class="metric-lbl">Best Score</div></div>
-      <div class="metric"><div class="metric-val" id="d-improve">—</div><div class="metric-lbl">Total Improvement</div></div>
+      <div class="metric"><div class="metric-val" id="d-improve">—</div><div class="metric-lbl">Improvement</div></div>
     </div>
     <div class="agrid">
-      <div class="acard">
-        <div class="acard-title">Score Trend</div>
-        <svg class="chart-svg" id="trendSvg" viewBox="0 0 400 200"></svg>
-      </div>
-      <div class="acard">
-        <div class="acard-title">Skills Breakdown</div>
-        <svg class="chart-svg" id="pieSvg" viewBox="0 0 400 220"></svg>
-      </div>
-      <div class="acard acard-full">
-        <div class="acard-title">Resume Score Comparison</div>
-        <svg class="chart-svg" id="barSvg" viewBox="0 0 800 220"></svg>
-      </div>
+      <div class="acard"><div class="acard-title">Score Trend</div><svg class="chart-svg" id="trendSvg" viewBox="0 0 400 200" style="height:200px"></svg></div>
+      <div class="acard"><div class="acard-title">Section Breakdown</div><svg class="chart-svg" id="pieSvg" viewBox="0 0 400 220" style="height:200px"></svg></div>
+      <div class="acard acard-full"><div class="acard-title">Score Comparison</div><svg class="chart-svg" id="barSvg" viewBox="0 0 800 220" style="height:220px"></svg></div>
     </div>
   </div>
 
@@ -305,16 +311,12 @@ body{font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;background:
   </div>
 
 </div>
-
-<!-- PDF.js for text extraction -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
-  if (window.pdfjsLib) {
-    pdfjsLib.GlobalWorkerOptions.workerSrc =
-      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-  }
+if(window.pdfjsLib){
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
 </script>
-<!-- Main app logic -->
 <script src="app.js"></script>
 </body>
 </html>
